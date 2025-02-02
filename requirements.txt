@@ -1,0 +1,12 @@
+ipykernel
+numpy
+pandas
+scikit-learn
+scipy
+matplotlib
+seaborn
+imblearn
+umap-learn
+
+ll = [self.probs[k] * multivariate_normal.pdf(x=X, mean=self.means[k], cov=self.covs[k]) for k in range(self.k)]
+        return np.sum(np.log(np.sum(ll, axis=0)))
