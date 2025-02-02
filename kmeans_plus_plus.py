@@ -5,16 +5,22 @@ class KMeans:
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.random_state = random_state
+        self.centroids = None
 
     def fit_predict(self, X):
 
-        for _ in range(self.max_iter):
-            centroids_init = self._init_centroids(X)
-            clusters = self._predict_clusters(X, centroids_init)
-            centroids_new = self._get_new_centroids(X, clusters)
+        centroids = self._init_centroids(X)
 
-            if np.all(centroids_init == centroids_new):
+
+        for _ in range(self.max_iter):
+            clusters = self._predict_clusters(X, centroids)
+            last_centroids = centroids.copy()
+            centroids = self._get_new_centroids(X, clusters)
+
+            if np.all(last_centroids == centroids):
                 break
+
+        self.centroids = centroids
 
         return clusters
     
@@ -74,3 +80,5 @@ class KMeans:
 
         return centroids
 
+    def get_centroids(self):
+            return self.centroids
