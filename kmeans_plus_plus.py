@@ -11,7 +11,6 @@ class KMeans:
 
         centroids = self._init_centroids(X)
 
-
         for _ in range(self.max_iter):
             clusters = self._predict_clusters(X, centroids)
             last_centroids = centroids.copy()
