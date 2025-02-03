@@ -1,27 +1,45 @@
 import numpy as np
 
 class KMeans:
-    def __init__(self, n_clusters, max_iter=300, random_state=None):
+    def __init__(self, n_clusters, max_iter=300, random_state=None, tol=1e-5):
         self.n_clusters = n_clusters
         self.max_iter = max_iter
         self.random_state = random_state
         self.centroids = None
+        self.tol = tol
+        self.clusters = None
+        self.num_iter = 0
 
     def fit_predict(self, X):
+        self.fit(X)  
+        return self.predict(X) 
+    
+    def fit(self, X):
 
         centroids = self._init_centroids(X)
 
-        for _ in range(self.max_iter):
+        self.num_iter=0
+
+        while True:
+
             clusters = self._predict_clusters(X, centroids)
             last_centroids = centroids.copy()
             centroids = self._get_new_centroids(X, clusters)
 
-            if np.all(last_centroids == centroids):
+            centroid_shift = np.linalg.norm(centroids - last_centroids)
+            
+            if centroid_shift <= self.tol:
                 break
+            
+            self.num_iter+=1
 
         self.centroids = centroids
 
-        return clusters
+    def predict(self, X):
+        if self.centroids is None:
+            raise ValueError("El modelo no ha sido ajustado. Llama a fit primero.")
+        
+        return self._predict_clusters(X, self.centroids)
     
     def _init_centroids(self, X):
         if self.n_clusters > len(X):
