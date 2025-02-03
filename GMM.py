@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import multivariate_normal
 from sklearn.datasets import make_spd_matrix
+from time import time
 
 """
 Possible optimizations?:
@@ -19,21 +20,18 @@ class GMM:
         self.print_freq = print_freq
 
     def log_likelihood(self, X):
-        n = X.shape[0]
-        result = 0.0
-        for i in range(n):
-            ln_arg = [self.probs[k] * multivariate_normal.pdf(x=X[i], mean=self.means[k], cov=self.covs[k]) for k in range(self.k)]
-            result += np.log( np.sum(ln_arg) )
-        return result
+        ll = [self.probs[k] * multivariate_normal.pdf(x=X, mean=self.means[k], cov=self.covs[k]) for k in range(self.k)]
+        return np.sum(np.log(np.sum(ll, axis=0)))
+        # return result
 
-    def fit(self, X, means=None):
+    def fit(self, X, centroids=None):
         # dimensions
         n = X.shape[0]
         d = X.shape[1]
 
         # randomly initialize parameters: sigmas, mus, pis
-        if means is not None:
-            self.means = means
+        if centroids is not None:
+            self.means = centroids
         else:
             self.means = np.random.normal(size=(self.k, d))
         self.covs = np.random.normal(size=(self.k, d, d))
@@ -48,12 +46,9 @@ class GMM:
 
             # EXPECTATION -------------------------------- ||
             # compute posteriors p(z|x)
-            for i in range(n):
-                # elements of gaussian mixture (posterior denominator)
-                gm_n = [self.probs[j] * multivariate_normal.pdf(x=X[i], mean=self.means[j], cov=self.covs[j]) for j in range(self.k)]
-                for k in range(self.k):
-                    posterior_n_k = gm_n[k] / np.sum(gm_n)
-                    posteriors[i][k] = posterior_n_k
+            posteriors = np.array([self.probs[k] * multivariate_normal.pdf(x=X, mean=self.means[k], cov=self.covs[k]) for k in range(self.k)])
+            posteriors /= np.sum(posteriors, axis=0)
+            posteriors = posteriors.T
 
             # MAXIMIZATION ------------------------------- ||
             # update mus, sigmas, pis
