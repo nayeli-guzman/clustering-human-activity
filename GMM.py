@@ -3,12 +3,6 @@ from scipy.stats import multivariate_normal
 from sklearn.datasets import make_spd_matrix
 from time import time
 
-"""
-Possible optimizations?:
-    - Use cupy
-    - Stochastic variant of EM?
-"""
-
 class GMM:
     def __init__(self, n_clusters = 3, print_freq = 20, max_iter = 200, tol=1e-3):
         self.k = n_clusters
@@ -18,6 +12,7 @@ class GMM:
         self.means = None   # mu (k x D)
         self.probs = None   # pi (k x 1)
         self.print_freq = print_freq
+        self.log_ll = 0.0
 
     def log_likelihood(self, X):
         ll = [self.probs[k] * multivariate_normal.pdf(x=X, mean=self.means[k], cov=self.covs[k]) for k in range(self.k)]
@@ -81,6 +76,7 @@ class GMM:
                 print("Converged at ", it, "iterations")
                 break
             prev_ll = log_likelihood
+        self.log_ll = prev_ll
             
     
     def predict(self, X):
