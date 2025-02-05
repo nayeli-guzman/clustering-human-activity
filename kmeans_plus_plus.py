@@ -27,7 +27,7 @@ class KMeans:
             centroids = self._get_new_centroids(X, clusters)
 
             centroid_shift = np.linalg.norm(centroids - last_centroids)
-            
+
             if centroid_shift <= self.tol:
                 break
             
